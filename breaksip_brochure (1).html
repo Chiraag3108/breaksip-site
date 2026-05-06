@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BreakSip — Drink Your Breakfast</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --choco: #1C0F00;
+    --choco-mid: #3D1A00;
+    --cocoa: #6B3A1F;
+    --caramel: #C4711A;
+    --gold: #E8A030;
+    --cream: #FDF6EC;
+    --milk: #FFFDF9;
+    --mango: #F5A623;
+    --strawberry: #E8365D;
+    --green-light: #E8F5EC;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--choco);
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 56px 0 40px;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(196,113,26,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(52px, 8vw, 88px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.2s;
+  }
+
+  .hero-title span {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-tagline {
+    font-size: 15px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.55);
+    letter-spacing: 0.08em;
+    margin-top: 16px;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.35s;
+  }
+
+  /* THE PROMISE STRIP */
+  .promise-strip {
+    display: flex;
+    gap: 0;
+    border: 1px solid rgba(196,113,26,0.3);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards 0.45s;
+  }
+
+  .promise-item {
+    flex: 1;
+    padding: 18px 12px;
+    text-align: center;
+    border-right: 1px solid rgba(196,113,26,0.2);
+    background: rgba(196,113,26,0.05);
+    transition: background 0.3s ease;
+  }
+
+  .promise-item:last-child { border-right: none; }
+  .promise-item:hover { background: rgba(196,113,26,0.12); }
+
+  .promise-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .promise-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(253,246,236,0.45);
+  }
+
+  /* SECTION LABEL */
+  .sec-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--caramel);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sec-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(196,113,26,0.25);
+  }
+
+  /* FLAVOUR CARDS */
+  .flavour-section { margin-bottom: 52px; }
+
+  .flavour-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+
+  .flavour-card {
+    border-radius: 20px;
+    padding: 28px 20px 24px;
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flavour-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .flavour-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+  }
+
+  .flavour-card:hover::before { opacity: 1; }
+
+  .fc-choco {
+    background: linear-gradient(145deg, #2C1503, #4A2008);
+    border: 1px solid rgba(196,113,26,0.3);
+  }
+  .fc-choco::before {
+    background: radial-gradient(circle at 30% 30%, rgba(196,113,26,0.2), transparent 60%);
+  }
+
+  .fc-mango {
+    background: linear-gradient(145deg, #2A1500, #5C2E00);
+    border: 1px solid rgba(245,166,35,0.3);
+  }
+  .fc-mango::before {
+    background: radial-gradient(circle at 30% 30%, rgba(245,166,35,0.2), transparent 60%);
+  }
+
+  .fc-strawberry {
+    background: linear-gradient(145deg, #2A0812, #5C1028);
+    border: 1px solid rgba(232,54,93,0.3);
+  }
+  .fc-strawberry::before {
+    background: radial-gradient(circle at 30% 30%, rgba(232,54,93,0.2), transparent 60%);
+  }
+
+  .flavour-emoji {
+    font-size: 36px;
+    margin-bottom: 14px;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    transition: transform 0.3s ease;
+  }
+
+  .flavour-card:hover .flavour-emoji {
+    transform: scale(1.15) rotate(-5deg);
+  }
+
+  .flavour-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .flavour-desc {
+    font-size: 12px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.5);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .flavour-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  .tag-choco { background: rgba(196,113,26,0.2); color: var(--gold); border: 1px solid rgba(196,113,26,0.3); }
+  .tag-mango { background: rgba(245,166,35,0.15); color: #F5A623; border: 1px solid rgba(245,166,35,0.3); }
+  .tag-strawberry { background: rgba(232,54,93,0.15); color: #E8365D; border: 1px solid rgba(232,54,93,0.3); }
+
+  /* NUTRITION SECTION */
+  .nutrition-section { margin-bottom: 52px; }
+
+  .nutrition-card {
+    background: rgba(196,113,26,0.06);
+    border: 1px solid rgba(196,113,26,0.2);
+    border-radius: 20px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nutrition-card::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,113,26,0.1), transparent 70%);
+    pointer-events: none;
+  }
+
+  .nutrition-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  .nut-item { text-align: center; }
+
+  .nut-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .nut-unit {
+    font-size: 14px;
+    color: rgba(253,246,236,0.4);
+    font-weight: 300;
+  }
+
+  .nut-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(253,246,236,0.4);
+    margin-top: 2px;
+  }
+
+  .nut-divider {
+    height: 1px;
+    background: rgba(196,113,26,0.2);
+    margin-bottom: 24px;
+  }
+
+  .nut-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .nut-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(28,15,0,0.5);
+    border: 1px solid rgba(196,113,26,0.2);
+    color: rgba(253,246,236,0.7);
+  }
+
+  .nut-badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* HOW IT WORKS */
+  .how-section { margin-bottom: 52px; }
+
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    position: relative;
+  }
+
+  .steps-row::before {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: calc(16.66% + 14px);
+    right: calc(16.66% + 14px);
+    height: 1px;
+    background: linear-gradient(to right, var(--caramel), rgba(196,113,26,0.3));
+  }
+
+  .step {
+    text-align: center;
+    padding: 0 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .step:hover { transform: translateY(-4px); }
+
+  .step-num {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 1.5px solid var(--caramel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    margin: 0 auto 16px;
+    background: var(--choco);
+    position: relative;
+    z-index: 1;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .step:hover .step-num {
+    background: rgba(196,113,26,0.15);
+    border-color: var(--gold);
+  }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    font-size: 12px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.4);
+    line-height: 1.6;
+  }
+
+  /* WHY BREAKSIP */
+  .why-section { margin-bottom: 52px; }
+
+  .why-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .why-card {
+    background: rgba(196,113,26,0.05);
+    border: 1px solid rgba(196,113,26,0.15);
+    border-radius: 16px;
+    padding: 20px 22px;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .why-card:hover {
+    border-color: rgba(196,113,26,0.35);
+    background: rgba(196,113,26,0.1);
+  }
+
+  .why-icon { font-size: 22px; margin-bottom: 10px; }
+
+  .why-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--cream);
+    margin-bottom: 5px;
+  }
+
+  .why-desc {
+    font-size: 12px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.45);
+    line-height: 1.6;
+  }
+
+  /* DELIVERY SECTION */
+  .delivery-section { margin-bottom: 52px; }
+
+  .delivery-card {
+    background: linear-gradient(135deg, rgba(196,113,26,0.12), rgba(61,26,0,0.4));
+    border: 1px solid rgba(196,113,26,0.25);
+    border-radius: 20px;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .delivery-left { }
+
+  .delivery-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .delivery-title span { color: var(--gold); font-style: italic; }
+
+  .delivery-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.5);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .price-tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .price-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .price-label {
+    font-size: 13px;
+    color: rgba(253,246,236,0.4);
+    font-weight: 300;
+  }
+
+  .delivery-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .del-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(28,15,0,0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(196,113,26,0.15);
+    font-size: 13px;
+    color: rgba(253,246,236,0.7);
+    font-weight: 300;
+    transition: border-color 0.3s;
+  }
+
+  .del-item:hover { border-color: rgba(196,113,26,0.3); }
+
+  .del-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(196,113,26,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* TRUST STRIP */
+  .trust-strip {
+    border: 1px solid rgba(196,113,26,0.2);
+    border-radius: 14px;
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 48px;
+    background: rgba(196,113,26,0.04);
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: rgba(253,246,236,0.55);
+    font-weight: 400;
+  }
+
+  .trust-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--caramel);
+    flex-shrink: 0;
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    padding: 48px 20px;
+    position: relative;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(196,113,26,0.12), transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
+
+  .cta-title span { color: var(--gold); font-style: italic; }
+
+  .cta-sub {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.4);
+    margin-bottom: 28px;
+  }
+
+  .cta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--caramel);
+    color: var(--cream);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 14px 28px;
+    border-radius: 50px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s, transform 0.3s;
+    letter-spacing: 0.05em;
+  }
+
+  .cta-pill:hover {
+    background: var(--gold);
+    transform: scale(1.04);
+    color: var(--choco);
+  }
+
+  .cta-locations {
+    margin-top: 20px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(253,246,236,0.25);
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 28px 0 0;
+    border-top: 1px solid rgba(196,113,26,0.15);
+  }
+
+  .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .footer-tag {
+    font-size: 11px;
+    font-weight: 300;
+    color: rgba(253,246,236,0.25);
+    letter-spacing: 0.1em;
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TOOLTIP on flavour hover */
+  .flavour-card .tooltip {
+    position: absolute;
+    bottom: -36px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--caramel);
+    color: var(--cream);
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .flavour-card:hover .tooltip { opacity: 1; }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .flavour-grid { grid-template-columns: 1fr; }
+    .nutrition-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .nut-val { font-size: 26px; }
+    .steps-row { grid-template-columns: 1fr; gap: 24px; }
+    .steps-row::before { display: none; }
+    .why-grid { grid-template-columns: 1fr; }
+    .delivery-card { grid-template-columns: 1fr; }
+    .trust-strip { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .promise-strip { flex-wrap: wrap; }
+    .promise-item { flex: 1 1 40%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Bangalore's Breakfast Revolution</div>
+    <div class="hero-title">Break<span>Sip</span></div>
+    <div class="hero-tagline">Drink Your Breakfast · Delivered at Your Workspace</div>
+
+    <!-- PROMISE STRIP -->
+    <div class="promise-strip">
+      <div class="promise-item">
+        <div class="promise-val">26–28g</div>
+        <div class="promise-label">Protein</div>
+      </div>
+      <div class="promise-item">
+        <div class="promise-val">16–18g</div>
+        <div class="promise-label">Fibre</div>
+      </div>
+      <div class="promise-item">
+        <div class="promise-val">Zero</div>
+        <div class="promise-label">Added Sugar</div>
+      </div>
+      <div class="promise-item">
+        <div class="promise-val">Zero</div>
+        <div class="promise-label">Preservatives</div>
+      </div>
+      <div class="promise-item">
+        <div class="promise-val">30s</div>
+        <div class="promise-label">To Make</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLAVOURS -->
+  <div class="flavour-section reveal">
+    <div class="sec-label">Three Flavours</div>
+    <div class="flavour-grid">
+
+      <div class="flavour-card fc-choco">
+        <span class="flavour-emoji">🍫</span>
+        <div class="flavour-name">Dark Chocolate<br>PB Power</div>
+        <div class="flavour-desc">Rich, thick, dessert-like. The kind of breakfast you'd actually look forward to at 7 AM.</div>
+        <span class="flavour-tag tag-choco">Hero SKU</span>
+        <div class="tooltip">Most popular · Launch favourite</div>
+      </div>
+
+      <div class="flavour-card fc-mango">
+        <span class="flavour-emoji">🥭</span>
+        <div class="flavour-name">Mango<br>Sunrise</div>
+        <div class="flavour-desc">Alphonso mango, warm spice, natural tropical sweetness. India's favourite fruit, elevated.</div>
+        <span class="flavour-tag tag-mango">Seasonal Gold</span>
+        <div class="tooltip">Alphonso mango · Natural spice</div>
+      </div>
+
+      <div class="flavour-card fc-strawberry">
+        <span class="flavour-emoji">🍓</span>
+        <div class="flavour-name">Strawberry<br>Cream</div>
+        <div class="flavour-desc">Bright, slightly tart, naturally pink. Looks like a dessert. Works like a breakfast.</div>
+        <span class="flavour-tag tag-strawberry">Fan Favourite</span>
+        <div class="tooltip">Freeze-dried real fruit</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NUTRITION -->
+  <div class="nutrition-section reveal">
+    <div class="sec-label">What's Inside Every Cup</div>
+    <div class="nutrition-card">
+      <div class="nutrition-grid">
+        <div class="nut-item">
+          <div class="nut-val">26–28<span class="nut-unit">g</span></div>
+          <div class="nut-label">Protein</div>
+        </div>
+        <div class="nut-item">
+          <div class="nut-val">16–18<span class="nut-unit">g</span></div>
+          <div class="nut-label">Fibre</div>
+        </div>
+        <div class="nut-item">
+          <div class="nut-val">420–450<span class="nut-unit">kcal</span></div>
+          <div class="nut-label">Complete Meal</div>
+        </div>
+      </div>
+      <div class="nut-divider"></div>
+      <div class="nut-badges">
+        <div class="nut-badge">
+          <div class="nut-badge-dot" style="background:#E8A030;"></div>
+          Plant-based protein sources
+        </div>
+        <div class="nut-badge">
+          <div class="nut-badge-dot" style="background:#E8365D;"></div>
+          Real freeze-dried fruit
+        </div>
+        <div class="nut-badge">
+          <div class="nut-badge-dot" style="background:#5B8BF5;"></div>
+          High calcium · Iron · Magnesium
+        </div>
+        <div class="nut-badge">
+          <div class="nut-badge-dot" style="background:#C4711A;"></div>
+          No refined sugar · No additives
+        </div>
+        <div class="nut-badge">
+          <div class="nut-badge-dot" style="background:#8B5CF6;"></div>
+          Omega-3 rich seeds
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section reveal">
+    <div class="sec-label">How It Works</div>
+    <div class="steps-row">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Open the sachet</div>
+        <div class="step-desc">Your BreakSip powder sachet. Pre-portioned, pre-measured. Nothing to think about.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Add 250ml milk</div>
+        <div class="step-desc">Pour into the cup. Full-fat milk for best taste. Any milk works.<br>
+          <span style="color:#E8A030; font-weight: 500;">
+            Don't worry - we'll sort the milk too.
+            </span>
+          </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Shake · Sip · Go</div>
+        <div class="step-desc">Snap the lid. Ten shakes. Done. Breakfast is solved.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY BREAKSIP -->
+  <div class="why-section reveal">
+    <div class="sec-label">Why BreakSip</div>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">⚡</div>
+        <div class="why-title">No kitchen needed</div>
+        <div class="why-desc">Built for PG rooms, shared apartments, and people who have 4 minutes between waking up and leaving. Zero cooking. Zero dishes.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🎯</div>
+        <div class="why-title">Actually complete nutrition</div>
+        <div class="why-desc">72% of urban breakfasts are nutritionally incomplete. One BreakSip cup is a full balanced meal — protein, fibre, micronutrients, the works.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">🍫</div>
+        <div class="why-title">Tastes like a treat</div>
+        <div class="why-desc">Dark chocolate peanut butter that tastes like dessert. Alphonso mango that tastes like summer. You'll actually want this at 7 AM.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">📦</div>
+        <div class="why-title">Delivered to your gate</div>
+        <div class="why-desc">We deliver/place right at the office gates or anywhere you want , just GRAB & GO.</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- TRUST STRIP -->
+  <div class="trust-strip reveal">
+    <div class="trust-item">
+      <div class="trust-dot"></div>
+      Real ingredients · No artificial flavours
+    </div>
+   
+    <div class="trust-item">
+      <div class="trust-dot"></div>
+      Freeze-dried real fruit
+    </div>
+    <div class="trust-item">
+      <div class="trust-dot"></div>
+      Zero preservatives · Zero additives
+    </div>
+  </div>
+  <div class="suggestion-section reveal" style="margin-bottom:48px;">
+  <div class="sec-label">Suggestions</div>
+  <div style="
+    background: rgba(196,113,26,0.05);
+    border: 1px solid rgba(196,113,26,0.2);
+    border-radius: 16px;
+    padding: 20px;
+  ">
+    <textarea 
+      placeholder="Tell us what you want improved, added, or changed..."
+      style="
+        width:100%;
+        height:100px;
+        background:transparent;
+        border:none;
+        outline:none;
+        color:#FDF6EC;
+        font-family:DM Sans;
+        font-size:13px;
+        resize:none;
+      "
+    ></textarea>
+  </div>
+</div>
+
+  <!-- CTA -->
+  <div class="cta-section reveal">
+    <div class="cta-title">Ready to drink<br><span>your breakfast?</span></div>
+    <div class="cta-sub">First 50 signups get early access + one free week.</div>
+    <button class="cta-pill" onclick="window.open('https://forms.google.com','_blank')">
+      ✦ &nbsp; Get Early Access — It's Free
+    </button>
+    <div class="cta-locations">Currently serving · Marathalli · ITPL · Whitefield · Bangalore</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+  <div class="footer-brand">BreakSip</div>
+  <div class="footer-tag">Drink Your Breakfast · Bangalore · © 2026 BreakSip</div>
+</div>
+
+</div>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Flavour card click ripple
+  document.querySelectorAll('.flavour-card').forEach(card => {
+    card.addEventListener('click', function(e) {
+      const ripple = document.createElement('div');
+      ripple.style.cssText = `
+        position:absolute;
+        border-radius:50%;
+        background:rgba(255,255,255,0.1);
+        width:10px;height:10px;
+        left:${e.offsetX}px;top:${e.offsetY}px;
+        transform:translate(-50%,-50%) scale(0);
+        animation:ripple 0.5s ease forwards;
+        pointer-events:none;
+      `;
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 500);
+    });
+  });
+
+  // Add ripple keyframe
+  const style = document.createElement('style');
+  style.textContent = `@keyframes ripple { to { transform:translate(-50%,-50%) scale(30); opacity:0; } }`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
